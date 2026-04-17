@@ -579,20 +579,35 @@ Feedback on this email is much appreciated - email us at ned@lattice.fund and sh
       const name = r.project_full_name || r.company || r.name || 'Unknown';
       const url = r.project_website || r.website || '';
       const sector = r.project_main_category || r.sector || r.category || 'Unknown';
-      const type = r.round_type || r.type || 'Unclassified Round';
-      const amount = formatAmount(parseFloat(r.round_value || r.amount || 0));
-      const status = r.project_status || 'Private';
+      const rawType = r.round_type || r.type || 'Unclassified Round';
+      const rawAmount = parseFloat(r.round_value || r.amount || 0);
+      const description = r.brief_description_of_project || r.brief_description || r.description || '';
+
+      // Format: "$5M Seed Round" or "Seed Round, Undisclosed Amount"
+      const roundLine = rawAmount > 0
+        ? `${formatAmount(rawAmount)} ${rawType}`
+        : `${rawType}, Undisclosed Amount`;
 
       const leadInvestors = Array.isArray(r.lead_investors) ? r.lead_investors : [];
       const investors = Array.isArray(r.investors) ? r.investors : [];
-      const allInvs = [...leadInvestors, ...investors];
-      const invNames = allInvs.map(i => i.investor_name || i.name || '').filter(Boolean);
-      const invStr = invNames.length ? invNames.join(', ') : (r.investors_str || r.investor || '.');
+      const leadNames = leadInvestors.map(i => i.investor_name || i.name || '').filter(Boolean);
+      const invNames = investors.map(i => i.investor_name || i.name || '').filter(Boolean);
 
-      body += `[${status}: ${name}](${url || '#'})\n\n`;
+      body += url ? `[${name}](${url})\n\n` : `${name}\n\n`;
       body += `Sector: ${sector}\n\n`;
-      body += `${amount} ${type}\n\n`;
-      body += `Investors: ${invStr}\n\n`;
+      body += `${roundLine}\n\n`;
+
+      if (leadNames.length && invNames.length) {
+        body += `Lead Investor: ${leadNames.join(', ')}\n\n`;
+        body += `Investors: ${invNames.join(', ')}\n\n`;
+      } else if (leadNames.length) {
+        body += `Lead Investor: ${leadNames.join(', ')}\n\n`;
+      } else if (invNames.length) {
+        body += `Investors: ${invNames.join(', ')}\n\n`;
+      }
+
+      if (description) body += `${description}\n\n`;
+
       body += `.\n\n`;
     });
   });

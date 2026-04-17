@@ -28,18 +28,26 @@ def get_rounds():
         )
         data = res.json()
 
-        # Rounds are stored as numbered keys "0", "1", "2"...
+        # Extract rounds from numbered keys "0", "1", "2"...
         rounds = []
         i = 0
         while str(i) in data:
             round_item = data[str(i)]
-            # Normalize field names (API uses "round_value(usd)" etc.)
+            # Normalize field names
             round_item["round_value"] = round_item.get("round_value(usd)", 0)
             round_item["round_valuation"] = round_item.get("round_valuation(usd)", 0)
             round_item["lead_investors"] = round_item.get("lead_investors_list", [])
             round_item["investors"] = round_item.get("investors_list", [])
             rounds.append(round_item)
             i += 1
+
+        # Print first round keys so we can debug description field name
+        if rounds:
+            print("=== FIRST ROUND KEYS ===", list(rounds[0].keys()))
+            print("=== DESCRIPTION FIELDS ===")
+            for k in rounds[0].keys():
+                if "desc" in k.lower() or "about" in k.lower() or "info" in k.lower() or "text" in k.lower():
+                    print(f"  {k}: {rounds[0][k]}")
 
         return jsonify({"ok": True, "results": rounds, "total": data.get("total_rounds", len(rounds))})
 
