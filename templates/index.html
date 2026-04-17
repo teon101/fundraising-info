@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trophy FF — Newsletter Formatter</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --surface: #0f0f0f;
+    --surface2: #141414;
+    --border: #1e1e1e;
+    --accent: #b8ff57;
+    --accent2: #57d4ff;
+    --text: #e8e8e8;
+    --muted: #555;
+    --muted2: #333;
+    --danger: #ff5757;
+    --gold: #ffd057;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    padding: 56px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 10px;
+    margin-bottom: 20px;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .subtitle span { color: var(--muted2); margin: 0 8px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+  }
+
+  .card-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 140px;
+  }
+
+  label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  input[type="number"], input[type="date"] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 10px 14px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus { border-color: var(--accent); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 11px 20px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #fff; }
+  .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn-blue { background: var(--accent2); color: #000; }
+  .btn-blue:hover { background: #fff; }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .status {
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--muted);
+    min-height: 18px;
+  }
+
+  .status.ok { color: var(--accent); }
+  .status.err { color: var(--danger); }
+  .status.loading { color: var(--accent2); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .stat { background: var(--surface2); padding: 20px; }
+
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.blue { color: var(--accent2); }
+  .stat-value.gold { color: var(--gold); }
+  .stat-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+  .output-area {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 24px;
+    font-size: 12px;
+    line-height: 1.8;
+    max-height: 420px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #ccc;
+  }
+
+  .output-area::-webkit-scrollbar { width: 4px; }
+  .output-area::-webkit-scrollbar-track { background: var(--bg); }
+  .output-area::-webkit-scrollbar-thumb { background: var(--muted2); }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .upload-zone {
+    border: 1px dashed var(--muted2);
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); color: var(--accent); }
+  .upload-zone input { display: none; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge">Live Data</div>
+    <h1>Trophy <span>FF</span></h1>
+    <div class="subtitle">
+      Newsletter Formatter
+      <span>/</span> Timezone-safe dates
+      <span>/</span> Excludes M&A & Public sales
+      <span>/</span> Sector mapping
+    </div>
+  </header>
+
+  <!-- Step 1 -->
+  <div class="card">
+    <div class="card-label">01 — Load Data</div>
+    <div class="input-row">
+      <div class="input-group" style="max-width:100px">
+        <label>Last N days</label>
+        <input type="number" id="daysInput" value="7" min="1" max="365">
+      </div>
+      <button class="btn btn-primary" onclick="fetchRounds()">↓ Fetch Rounds</button>
+    </div>
+    <div class="status" id="fetchStatus"></div>
+
+    <div class="divider">or upload a CSV</div>
+
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('csvInput').click()">
+      <input type="file" id="csvInput" accept=".csv" onchange="handleCSV(event)">
+      ↑ Click to upload CSV
+    </div>
+    <div class="status" id="uploadStatus"></div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card hidden" id="step2">
+    <div class="card-label">02 — Configure & Generate</div>
+    <div class="input-row">
+      <div class="input-group">
+        <label>Start Date</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="input-group">
+        <label>End Date</label>
+        <input type="date" id="endDate">
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="generateNewsletter()">Generate</button>
+        <button class="btn btn-secondary" onclick="downloadCSV()">↓ CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="hidden" id="statsSection">
+    <div class="card-label" style="margin-bottom:12px; font-size:9px; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:8px;">
+      Weekly Stats <span style="flex:1; height:1px; background:var(--border); display:block;"></span>
+    </div>
+    <div class="stats-grid" id="statsGrid"></div>
+    <div style="font-size:10px; color:var(--muted); margin-bottom:20px;" id="statsDebug"></div>
+  </div>
+
+  <!-- Output -->
+  <div class="card hidden" id="outputSection">
+    <div class="card-label">03 — Formatted Newsletter</div>
+    <div class="output-area" id="newsletterOutput"></div>
+    <div class="btn-row">
+      <button class="btn btn-blue" onclick="copyHTML()">⎘ Copy HTML</button>
+      <button class="btn btn-secondary" onclick="downloadMD()">↓ Download MD</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const EXCLUDED_TYPES = ['m&a', 'merger', 'acquisition', 'public sale', 'ipo'];
+
+let allRounds = [];
+let filteredRounds = [];
+
+function setStatus(id, msg, cls) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'status ' + (cls || '');
+}
+
+function formatAmount(val) {
+  if (!val || val == 0) return 'Undisclosed';
+  if (val >= 1e9) return '$' + (val / 1e9).toFixed(1) + 'B';
+  if (val >= 1e6) return '$' + Math.round(val / 1e6) + 'M';
+  if (val >= 1e3) return '$' + Math.round(val / 1e3) + 'K';
+  return '$' + val;
+}
+
+function parseRoundDate(raw) {
+  if (!raw) return null;
+  const s = String(raw);
+  if (s.length === 8) {
+    return new Date(s.slice(0,4) + '-' + s.slice(4,6) + '-' + s.slice(6,8) + 'T12:00:00Z');
+  }
+  return new Date(raw + 'T12:00:00Z');
+}
+
+function formatDateDisplay(d) {
+  if (!d) return '';
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' });
+}
+
+function toInputDate(d) {
+  return d.toISOString().slice(0, 10);
+}
+
+function isExcluded(round) {
+  const rt = (round.round_type || round.type || '').toLowerCase();
+  return EXCLUDED_TYPES.some(ex => rt.includes(ex));
+}
+
+async function fetchRounds() {
+  const days = parseInt(document.getElementById('daysInput').value) || 7;
+  const lmDate = new Date();
+  lmDate.setDate(lmDate.getDate() - days);
+  const lm = toInputDate(lmDate);
+
+  setStatus('fetchStatus', '⟳ Fetching rounds…', 'loading');
+
+  try {
+    // Calls our local Flask proxy — no CORS issues
+    const res = await fetch(`/api/rounds?lm=${lm}`);
+    const data = await res.json();
+
+    const results = data.results || data.result || [];
+
+    if (!Array.isArray(results) || results.length === 0) {
+      throw new Error(data.description || 'No results returned');
+    }
+
+    allRounds = results;
+    setStatus('fetchStatus', `✓ ${results.length} rounds loaded`, 'ok');
+    initStep2(results);
+  } catch(e) {
+    setStatus('fetchStatus', '✗ ' + e.message, 'err');
+  }
+}
+
+function handleCSV(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const rows = parseCSV(ev.target.result);
+    allRounds = rows;
+    setStatus('uploadStatus', `✓ CSV loaded (${rows.length} companies)`, 'ok');
+    initStep2(rows);
+  };
+  reader.readAsText(file);
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = vals[i] || '');
+    return obj;
+  });
+}
+
+function initStep2(rounds) {
+  document.getElementById('step2').classList.remove('hidden');
+  const dates = rounds.map(r => parseRoundDate(r.round_date || r.date)).filter(Boolean);
+  if (dates.length) {
+    dates.sort((a, b) => a - b);
+    document.getElementById('startDate').value = toInputDate(dates[0]);
+    document.getElementById('endDate').value = toInputDate(dates[dates.length - 1]);
+  }
+}
+
+function generateNewsletter() {
+  const start = new Date(document.getElementById('startDate').value + 'T00:00:00Z');
+  const end = new Date(document.getElementById('endDate').value + 'T23:59:59Z');
+
+  filteredRounds = allRounds.filter(r => {
+    if (isExcluded(r)) return false;
+    const d = parseRoundDate(r.round_date || r.date);
+    if (!d) return true;
+    return d >= start && d <= end;
+  });
+
+  const excluded = allRounds.filter(r => isExcluded(r));
+  const ma = excluded.filter(r => {
+    const rt = (r.round_type || r.type || '').toLowerCase();
+    return rt.includes('m&a') || rt.includes('merger') || rt.includes('acquisition');
+  }).length;
+  const pub = excluded.filter(r => {
+    const rt = (r.round_type || r.type || '').toLowerCase();
+    return rt.includes('public sale') || rt.includes('ipo');
+  }).length;
+
+  const totalRaised = filteredRounds.reduce((s, r) => s + parseFloat(r.round_value || r.amount || 0), 0);
+
+  const sectorMap = {};
+  filteredRounds.forEach(r => {
+    const sec = r.project_main_category || r.sector || r.category || 'Other';
+    sectorMap[sec] = (sectorMap[sec] || 0) + parseFloat(r.round_value || r.amount || 0);
+  });
+  const topSector = Object.entries(sectorMap).sort((a, b) => b[1] - a[1])[0];
+
+  const largest = filteredRounds.reduce((best, r) => {
+    return parseFloat(r.round_value || r.amount || 0) > parseFloat(best?.round_value || best?.amount || 0) ? r : best;
+  }, null);
+
+  const weekAvg = totalRaised / 12;
+
+  showStats({ totalRaised, weekAvg, count: filteredRounds.length, topSector, largest, ma, pub });
+
+  const md = buildNewsletter(filteredRounds);
+  document.getElementById('newsletterOutput').textContent = md;
+  document.getElementById('outputSection').classList.remove('hidden');
+  document.getElementById('statsSection').classList.remove('hidden');
+
+  document.getElementById('statsDebug').textContent =
+    `Debug: Total in range: ${allRounds.length} | Included: ${filteredRounds.length} | Excluded: ${ma} M&A + ${pub} Public sales`;
+}
+
+function showStats({ totalRaised, weekAvg, count, topSector, largest, ma, pub }) {
+  const largestName = largest ? (largest.project_full_name || largest.company || largest.name || '—') : '—';
+  const largestAmt = largest ? formatAmount(parseFloat(largest.round_value || largest.amount || 0)) : '—';
+  const largestType = largest ? (largest.round_type || largest.type || 'Round') : '';
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat">
+      <div class="stat-label">Total Raised</div>
+      <div class="stat-value accent">${formatAmount(totalRaised)}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">12 Week Avg</div>
+      <div class="stat-value">${formatAmount(weekAvg)}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Companies Funded</div>
+      <div class="stat-value blue">${count}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Top Sector</div>
+      <div class="stat-value gold" style="font-size:16px">${topSector ? topSector[0] : '—'}</div>
+      <div class="stat-sub">${topSector ? formatAmount(topSector[1]) : ''}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Largest Round</div>
+      <div class="stat-value" style="font-size:16px">${largestName}</div>
+      <div class="stat-sub">${largestAmt} ${largestType}</div>
+    </div>
+  `;
+}
+
+function buildNewsletter(rounds) {
+  const intro = `Welcome to the Trophy FF weekly fundraising digest. Here we will highlight rounds from the week, flag trends worth watching in the industry, and share insights from founders on their fundraising experience.
+
+ICYMI Trophy FF is now open to all with no access code needed!
+
+Feedback on this email is much appreciated - email us at ned@lattice.fund and share what you'd like to see.
+
+## Weekly Fundraising Stats
+
+[INSERT STATS IMAGE HERE]
+
+## All Rounds Completed This Week:
+`;
+
+  const byDate = {};
+  rounds.forEach(r => {
+    const d = parseRoundDate(r.round_date || r.date);
+    const key = d ? toInputDate(d) : 'Unknown';
+    if (!byDate[key]) byDate[key] = [];
+    byDate[key].push(r);
+  });
+
+  const sorted = Object.entries(byDate).sort((a, b) => a[0] > b[0] ? 1 : -1);
+
+  let body = '';
+  sorted.forEach(([dateKey, dayRounds]) => {
+    const d = dateKey !== 'Unknown' ? new Date(dateKey + 'T12:00:00Z') : null;
+    body += `\n### ${d ? formatDateDisplay(d) : 'Unknown Date'}\n\n`;
+
+    dayRounds.forEach(r => {
+      const name = r.project_full_name || r.company || r.name || 'Unknown';
+      const url = r.project_website || r.website || '';
+      const sector = r.project_main_category || r.sector || r.category || 'Unknown';
+      const type = r.round_type || r.type || 'Unclassified Round';
+      const amount = formatAmount(parseFloat(r.round_value || r.amount || 0));
+      const status = r.project_status || 'Private';
+
+      const leadInvestors = Array.isArray(r.lead_investors) ? r.lead_investors : [];
+      const investors = Array.isArray(r.investors) ? r.investors : [];
+      const allInvs = [...leadInvestors, ...investors];
+      const invNames = allInvs.map(i => i.investor_name || i.name || '').filter(Boolean);
+      const invStr = invNames.length ? invNames.join(', ') : (r.investors_str || r.investor || '.');
+
+      body += `[${status}: ${name}](${url || '#'})\n\n`;
+      body += `Sector: ${sector}\n\n`;
+      body += `${amount} ${type}\n\n`;
+      body += `Investors: ${invStr}\n\n`;
+      body += `.\n\n`;
+    });
+  });
+
+  return intro + body;
+}
+
+function downloadCSV() {
+  if (!filteredRounds.length) return;
+  const headers = ['Company', 'Date', 'Amount', 'Type', 'Sector', 'Investors', 'Website'];
+  const rows = filteredRounds.map(r => {
+    const d = parseRoundDate(r.round_date || r.date);
+    const leadInvestors = Array.isArray(r.lead_investors) ? r.lead_investors : [];
+    const investors = Array.isArray(r.investors) ? r.investors : [];
+    const allInvs = [...leadInvestors, ...investors];
+    const invNames = allInvs.map(i => i.investor_name || i.name || '').filter(Boolean);
+    return [
+      r.project_full_name || r.company || r.name || '',
+      d ? toInputDate(d) : '',
+      r.round_value || r.amount || '',
+      r.round_type || r.type || '',
+      r.project_main_category || r.sector || '',
+      invNames.join('; ') || r.investors_str || '',
+      r.project_website || r.website || ''
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`);
+  });
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  triggerDownload('trophy-rounds.csv', csv, 'text/csv');
+}
+
+function downloadMD() {
+  const md = document.getElementById('newsletterOutput').textContent;
+  triggerDownload('trophy-newsletter.md', md, 'text/markdown');
+}
+
+function copyHTML() {
+  const md = document.getElementById('newsletterOutput').textContent;
+  let html = md
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/^\. *$/gm, '<hr>');
+  navigator.clipboard.writeText(html).then(() => {
+    const btn = document.querySelector('.btn-blue');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+function triggerDownload(filename, content, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Drag & drop upload
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) handleCSV({ target: { files: [file] } });
+});
+</script>
+</body>
+</html>
